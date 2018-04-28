@@ -1,0 +1,252 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>Filter Design</title><meta name="generator" content="MATLAB 8.5"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2018-04-27"><meta name="DC.source" content="dspfilterdsgn.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>Filter Design</h1><!--introduction--><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">FIR and IIR Filter Design</a></li><li><a href="#2">Input Signal x(n)</a></li><li><a href="#3">Background Noise Addition</a></li><li><a href="#4">Designing Low Pass FIR Blackman Window Filter</a></li><li><a href="#5">Plot the magnitude response of FIR filter</a></li><li><a href="#6">Plot the phase response of FIR filter</a></li><li><a href="#7">Plot the group delay of FIR filter</a></li><li><a href="#8">Calculate FIR Filtered Output</a></li><li><a href="#9">Designing Band Pass IIR Butterworth Filter</a></li><li><a href="#10">Plot the magnitude response of IIR filter</a></li><li><a href="#11">Plot the phase response of IIR filter</a></li><li><a href="#12">Plot the group delay of IIR filter</a></li><li><a href="#13">Calculate IIR Filtered Output</a></li></ul></div><h2>FIR and IIR Filter Design<a name="1"></a></h2><pre class="codeinput"><span class="comment">%------------------------------------------------------------------------</span>
+<span class="comment">% FIR and IIR Filter Design using Filter Design Tools</span>
+<span class="comment">% Written by Abhiram S</span>
+<span class="comment">%------------------------------------------------------------------------</span>
+</pre><h2>Input Signal x(n)<a name="2"></a></h2><p>Normalized frequency components</p><pre class="codeinput">f = [0.1 0.2 0.5 0.65 0.75 1.1 1.3 1.75 1.9];
+N = 400;  <span class="comment">% No. of samples</span>
+n = 1:N;
+x = 0;
+
+<span class="comment">% Signal Generation</span>
+<span class="keyword">for</span> i = 1:length(f)
+    x = x + exp(1i*pi*f(i)*n);
+<span class="keyword">end</span>
+
+<span class="comment">% Frequency Spectrum Plot of x(n)</span>
+Xk = fft(x);
+plot(n*2/max(n),abs(Xk));
+xlabel(<span class="string">'Normalized Frequency (\times\pi rad)'</span>);
+ylabel(<span class="string">'|X(\omega)|'</span>);
+title(<span class="string">'Frequency Spectrum of x(n)'</span>);
+</pre><img vspace="5" hspace="5" src="dspfilterdsgn_01.png" alt=""> <h2>Background Noise Addition<a name="3"></a></h2><pre class="codeinput">bn = length(f)/20*(randn(1,N)+1i*randn(1,N));
+x = x + bn;
+
+<span class="comment">% Frequency Spectrum Plot of x(n) with Background Noise</span>
+Xk = fft(x);
+plot(n*2/max(n),abs(Xk));
+xlabel(<span class="string">'Normalized Frequency (\times\pi rad)'</span>);
+ylabel(<span class="string">'|X_{n}(\omega)|'</span>);
+title(<span class="string">'Frequency Spectrum of x_{n}(n)'</span>);
+</pre><img vspace="5" hspace="5" src="dspfilterdsgn_02.png" alt=""> <h2>Designing Low Pass FIR Blackman Window Filter<a name="4"></a></h2><p>Frequency Normalized to 1</p><pre class="codeinput">Nr   = 110;      <span class="comment">% Order</span>
+Fc   = 0.4;      <span class="comment">% Cutoff Frequency</span>
+flag = <span class="string">'scale'</span>;  <span class="comment">% Sampling Flag</span>
+
+<span class="comment">% Create the window vector for the design algorithm</span>
+win = blackman(Nr+1);
+
+<span class="comment">% Calculate the coefficients using the FIR function</span>
+b = fir1(Nr, Fc, <span class="string">'low'</span>, win, flag);
+Hlp = dfilt.dffir(b);
+</pre><h2>Plot the magnitude response of FIR filter<a name="5"></a></h2><pre class="codeinput">fvtool(Hlp,<span class="string">'analysis'</span>,<span class="string">'magnitude'</span>);
+</pre><img vspace="5" hspace="5" src="dspfilterdsgn_03.png" alt=""> <h2>Plot the phase response of FIR filter<a name="6"></a></h2><pre class="codeinput">fvtool(Hlp,<span class="string">'analysis'</span>,<span class="string">'phase'</span>);
+</pre><img vspace="5" hspace="5" src="dspfilterdsgn_04.png" alt=""> <h2>Plot the group delay of FIR filter<a name="7"></a></h2><pre class="codeinput">fvtool(Hlp,<span class="string">'analysis'</span>,<span class="string">'grpdelay'</span>);
+</pre><img vspace="5" hspace="5" src="dspfilterdsgn_05.png" alt=""> <h2>Calculate FIR Filtered Output<a name="8"></a></h2><pre class="codeinput">y = filter(Hlp,x);
+
+<span class="comment">% Plot Frequency Spectrum of Output</span>
+Yk = fft(y);
+plot(n*2/max(n),abs(Yk));
+xlabel(<span class="string">'Normalized Frequency (\times\pi rad)'</span>);
+ylabel(<span class="string">'|Y(\omega)|'</span>);
+title([<span class="string">'Low Pass Filtered Output (F_{c}=0.4) '</span>,<span class="keyword">...</span>
+<span class="string">'using Blackman Window FIR Filter'</span>]);
+</pre><img vspace="5" hspace="5" src="dspfilterdsgn_06.png" alt=""> <h2>Designing Band Pass IIR Butterworth Filter<a name="9"></a></h2><p>Frequency Normalized to 1</p><pre class="codeinput">Fstop1 = 0.35;  <span class="comment">% First Stopband Frequency</span>
+Fpass1 = 0.45;  <span class="comment">% First Passband Frequency</span>
+Fpass2 = 0.75;  <span class="comment">% Second Passband Frequency</span>
+Fstop2 = 0.85;  <span class="comment">% Second Stopband Frequency</span>
+Astop1 = 80;    <span class="comment">% First Stopband Attenuation (dB)</span>
+Apass  = 1;     <span class="comment">% Passband Ripple (dB)</span>
+Astop2 = 80;    <span class="comment">% Second Stopband Attenuation (dB)</span>
+
+h = fdesign.bandpass(<span class="string">'fst1,fp1,fp2,fst2,ast1,ap,ast2'</span>, <span class="keyword">...</span>
+    Fstop1, Fpass1, Fpass2, Fstop2, Astop1, Apass, Astop2);
+
+Hbp = design(h, <span class="string">'butter'</span>, <span class="string">'MatchExactly'</span>, <span class="keyword">...</span>
+      <span class="string">'stopband'</span>, <span class="string">'SOSScaleNorm'</span>, <span class="string">'Linf'</span>);
+</pre><h2>Plot the magnitude response of IIR filter<a name="10"></a></h2><pre class="codeinput">fvtool(Hbp,<span class="string">'analysis'</span>,<span class="string">'magnitude'</span>);
+</pre><img vspace="5" hspace="5" src="dspfilterdsgn_07.png" alt=""> <h2>Plot the phase response of IIR filter<a name="11"></a></h2><pre class="codeinput">fvtool(Hbp,<span class="string">'analysis'</span>,<span class="string">'phase'</span>);
+</pre><img vspace="5" hspace="5" src="dspfilterdsgn_08.png" alt=""> <h2>Plot the group delay of IIR filter<a name="12"></a></h2><pre class="codeinput">fvtool(Hbp,<span class="string">'analysis'</span>,<span class="string">'grpdelay'</span>);
+</pre><img vspace="5" hspace="5" src="dspfilterdsgn_09.png" alt=""> <h2>Calculate IIR Filtered Output<a name="13"></a></h2><pre class="codeinput">y = filter(Hbp,x);
+
+<span class="comment">% Plot Frequency Spectrum of Output</span>
+Yk = fft(y);
+plot(n*2/max(n),abs(Yk));
+xlabel(<span class="string">'Normalized Frequency (\times\pi rad)'</span>);
+ylabel(<span class="string">'|Y(\omega)|'</span>);
+title([<span class="string">'Band Pass Filtered Output (F_{c1}=0.4,F_{c2}=0.8) '</span>,<span class="keyword">...</span>
+<span class="string">'using IIR Butterworth Filter'</span>]);
+</pre><img vspace="5" hspace="5" src="dspfilterdsgn_10.png" alt=""> <p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2015a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% Filter Design
+%% FIR and IIR Filter Design
+%REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
+% FIR and IIR Filter Design using Filter Design Tools
+% Written by Abhiram S
+%REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
+%% Input Signal x(n)
+% Normalized frequency components
+f = [0.1 0.2 0.5 0.65 0.75 1.1 1.3 1.75 1.9];
+N = 400;  % No. of samples
+n = 1:N;
+x = 0;
+ 
+% Signal Generation
+for i = 1:length(f)
+    x = x + exp(1i*pi*f(i)*n);
+end
+
+% Frequency Spectrum Plot of x(n)
+Xk = fft(x);
+plot(n*2/max(n),abs(Xk));
+xlabel('Normalized Frequency (\times\pi rad)');
+ylabel('|X(\omega)|');
+title('Frequency Spectrum of x(n)');
+
+%% Background Noise Addition
+bn = length(f)/20*(randn(1,N)+1i*randn(1,N));
+x = x + bn;
+
+% Frequency Spectrum Plot of x(n) with Background Noise
+Xk = fft(x);
+plot(n*2/max(n),abs(Xk));
+xlabel('Normalized Frequency (\times\pi rad)');
+ylabel('|X_{n}(\omega)|');
+title('Frequency Spectrum of x_{n}(n)');
+
+%% Designing Low Pass FIR Blackman Window Filter
+% Frequency Normalized to 1
+Nr   = 110;      % Order
+Fc   = 0.4;      % Cutoff Frequency
+flag = 'scale';  % Sampling Flag
+ 
+% Create the window vector for the design algorithm
+win = blackman(Nr+1);
+ 
+% Calculate the coefficients using the FIR function
+b = fir1(Nr, Fc, 'low', win, flag);
+Hlp = dfilt.dffir(b);
+
+%% Plot the magnitude response of FIR filter
+fvtool(Hlp,'analysis','magnitude');
+
+%% Plot the phase response of FIR filter
+fvtool(Hlp,'analysis','phase');
+
+%% Plot the group delay of FIR filter
+fvtool(Hlp,'analysis','grpdelay');
+
+%% Calculate FIR Filtered Output
+y = filter(Hlp,x);
+
+% Plot Frequency Spectrum of Output
+Yk = fft(y);
+plot(n*2/max(n),abs(Yk));
+xlabel('Normalized Frequency (\times\pi rad)');
+ylabel('|Y(\omega)|');
+title(['Low Pass Filtered Output (F_{c}=0.4) ',...
+'using Blackman Window FIR Filter']);
+
+%% Designing Band Pass IIR Butterworth Filter
+% Frequency Normalized to 1
+Fstop1 = 0.35;  % First Stopband Frequency
+Fpass1 = 0.45;  % First Passband Frequency
+Fpass2 = 0.75;  % Second Passband Frequency
+Fstop2 = 0.85;  % Second Stopband Frequency
+Astop1 = 80;    % First Stopband Attenuation (dB)
+Apass  = 1;     % Passband Ripple (dB)
+Astop2 = 80;    % Second Stopband Attenuation (dB)
+ 
+h = fdesign.bandpass('fst1,fp1,fp2,fst2,ast1,ap,ast2', ...
+    Fstop1, Fpass1, Fpass2, Fstop2, Astop1, Apass, Astop2);
+ 
+Hbp = design(h, 'butter', 'MatchExactly', ...
+      'stopband', 'SOSScaleNorm', 'Linf');
+  
+%% Plot the magnitude response of IIR filter
+fvtool(Hbp,'analysis','magnitude');
+
+%% Plot the phase response of IIR filter
+fvtool(Hbp,'analysis','phase');
+
+%% Plot the group delay of IIR filter
+fvtool(Hbp,'analysis','grpdelay');
+
+%% Calculate IIR Filtered Output
+y = filter(Hbp,x);
+
+% Plot Frequency Spectrum of Output
+Yk = fft(y);
+plot(n*2/max(n),abs(Yk));
+xlabel('Normalized Frequency (\times\pi rad)');
+ylabel('|Y(\omega)|');
+title(['Band Pass Filtered Output (F_{c1}=0.4,F_{c2}=0.8) ',...
+'using IIR Butterworth Filter']);
+##### SOURCE END #####
+--></body></html>

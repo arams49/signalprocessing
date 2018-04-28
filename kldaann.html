@@ -1,0 +1,561 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>Dimensionality Reduction and Classification using KLDA + ANN</title><meta name="generator" content="MATLAB 8.5"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2018-04-26"><meta name="DC.source" content="kldaann.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>Dimensionality Reduction and Classification using KLDA + ANN</h1><!--introduction--><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Function to perform KLDA and ANN</a></li><li><a href="#2">Dataset Load</a></li><li><a href="#3">Kernel LDA Function</a></li><li><a href="#4">Data formatting</a></li><li><a href="#5">Gram matrix</a></li><li><a href="#6">Test matrix</a></li><li><a href="#7">Class separation</a></li><li><a href="#8">Scatter matrix</a></li><li><a href="#9">Dimensionality reduction</a></li><li><a href="#10">Feature Scaling and Normalization</a></li><li><a href="#11">3D Plot of Training Data</a></li><li><a href="#12">Classification using Artificial Neural Network</a></li><li><a href="#13">Neural Network Load</a></li><li><a href="#14">Reordering of Training Data</a></li><li><a href="#15">Neural Network Initialization</a></li><li><a href="#16">Neural Network Training</a></li><li><a href="#17">Sum Squared Error Plot</a></li><li><a href="#18">Model of Trained Neural Network</a></li><li><a href="#19">Neural Network Testing</a></li></ul></div><h2>Function to perform KLDA and ANN<a name="1"></a></h2><pre class="codeinput"><span class="comment">%-----------------------------------------------------------------------</span>
+<span class="comment">% Dimensionality Reduction using Kernel Linear Discriminant Analysis</span>
+<span class="comment">% Classification using Artificial Neural Network</span>
+<span class="comment">% Written by Abhiram S</span>
+<span class="comment">%-----------------------------------------------------------------------</span>
+</pre><h2>Dataset Load<a name="2"></a></h2><pre class="codeinput">filename = <span class="string">'Meter C'</span>;
+Data = load(filename);  <span class="comment">% Load the appropriate Dataset</span>
+K = floor(0.15*size(Data,1));  <span class="comment">% No. of instances in Test set</span>
+tek = randperm(size(Data,1),K);  <span class="comment">% Random instances for Test set</span>
+TEData = Data(tek,:);  <span class="comment">% Test Data Set</span>
+Tecl = TEData(:,end);  <span class="comment">% Classes of Test Data Set</span>
+TEData = TEData(:,1:1:end-1);  <span class="comment">% Removing class feature for testing</span>
+TRData = Data;  <span class="comment">% Training Data Set</span>
+</pre><h2>Kernel LDA Function<a name="3"></a></h2><pre class="codeinput"><span class="comment">%-----------------------------------------------------------------------</span>
+<span class="comment">% Performs Dimensionality Reduction for the given Dataset</span>
+<span class="comment">% using Kernel Linear Discriminant Analysis technique</span>
+<span class="comment">%-----------------------------------------------------------------------</span>
+</pre><h2>Data formatting<a name="4"></a></h2><pre class="codeinput">Cls = TRData(:,end);  <span class="comment">% Class feature extraction</span>
+Ucls = unique(Cls);  <span class="comment">% Extraction of distinct classes</span>
+TRData = TRData(:,1:1:end-1);  <span class="comment">% Removing class feature for training</span>
+</pre><h2>Gram matrix<a name="5"></a></h2><pre class="codeinput">P = size(TRData,1);  <span class="comment">% Training Data Instances</span>
+sg = 0.005;  <span class="comment">% Standard Deviation of Gaussian Kernel</span>
+KGM = zeros(P);  <span class="comment">% Gaussian Kernel Gram Matrix</span>
+<span class="keyword">for</span> i = 1:1:P
+    <span class="keyword">for</span> j = 1:1:P
+        t1 = TRData(i,:);
+        t2 = TRData(j,:);
+        t1 = t1/sqrt(sum(t1.^2));
+        t2 = t2/sqrt(sum(t2.^2));
+        KGM(i,j) = exp( -sum((t1-t2).^2) / (sg^2));
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+</pre><h2>Test matrix<a name="6"></a></h2><pre class="codeinput">Q = size(TEData,1);  <span class="comment">% Test Data Instances</span>
+TM = zeros(Q,P);  <span class="comment">% Test Matrix</span>
+<span class="keyword">for</span> i = 1:1:Q
+    <span class="keyword">for</span> j = 1:1:P
+        t1 = TEData(i,:);
+        t2 = TRData(j,:);
+        t1 = t1/sqrt(sum(t1.^2));
+        t2 = t2/sqrt(sum(t2.^2));
+        TM(i,j) = exp( -sum((t1-t2).^2) / (sg^2));
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+</pre><h2>Class separation<a name="7"></a></h2><pre class="codeinput">DCell = cell(length(Ucls),1);  <span class="comment">% Grouping class vectors into cells</span>
+<span class="keyword">for</span> p = 1:1:length(Ucls)
+    DCell{p} = KGM(Cls==Ucls(p),:);
+<span class="keyword">end</span>
+</pre><h2>Scatter matrix<a name="8"></a></h2><pre class="codeinput">Sw = 0;  <span class="comment">% Within-Class Scatter Matrix</span>
+Mn = zeros(length(Ucls),P);
+<span class="keyword">for</span> p = 1:1:length(Ucls)
+    Sw = Sw + cov(DCell{p});
+    Mn(p,:) = mean(DCell{p});
+<span class="keyword">end</span>
+Sb = cov(Mn);  <span class="comment">% Between-Class Scatter Matrix</span>
+</pre><h2>Dimensionality reduction<a name="9"></a></h2><pre class="codeinput">[V,E] = eig(pinv(Sw)*Sb);  <span class="comment">% Eigenvalues and Eigenvectors</span>
+E = E/max(max(E));
+[E,I] = sort(diag(E),<span class="string">'descend'</span>);
+thr = 0.001;  <span class="comment">% Normalised Threshold for choosing eigenvalue</span>
+Te = E(E&gt;thr);
+W = V(:, I(1:1:length(Te)) );  <span class="comment">% Discriminant Matrix</span>
+TrainDR = KGM * W;  <span class="comment">% Dimensionally Reduced Training Data</span>
+TestDR = TM * W;  <span class="comment">% Dimensionally Reduced Test Data</span>
+</pre><h2>Feature Scaling and Normalization<a name="10"></a></h2><pre class="codeinput">Ni = size(TrainDR,2);  <span class="comment">% Number of reduced features</span>
+MTD = zeros(1,Ni);  <span class="comment">% Mean of attributes</span>
+SDVTD = zeros(1,Ni);  <span class="comment">% Standard Deviation of attributes</span>
+<span class="keyword">for</span> j = 1:1:Ni
+    MTD(j) = mean(TrainDR(:,j));
+    SDVTD(j) = 0.5*std(TrainDR(:,j));
+    TrainDR(:,j) = (TrainDR(:,j) - MTD(j))/SDVTD(j);
+<span class="keyword">end</span>
+Nt = size(TestDR,1);
+TestDR = (TestDR - repmat(MTD,[Nt,1]))./repmat(SDVTD,[Nt,1]);
+</pre><h2>3D Plot of Training Data<a name="11"></a></h2><pre class="codeinput">r = TrainDR;
+
+<span class="keyword">if</span>(Ni==2)
+    r(:,3) = zeros(size(r,1),1);
+<span class="keyword">else</span>
+    <span class="keyword">if</span>(Ni==1)
+        r(:,[2,3]) = zeros(size(r,1),2);
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+
+<span class="comment">% 3D Scatter Plot</span>
+Syc={<span class="string">'o'</span>,<span class="string">'x'</span>,<span class="string">'+'</span>,<span class="string">'s'</span>};
+t=0;
+lgdtxt = cell(length(Ucls),1);
+figure;
+hold <span class="string">on</span>;
+<span class="keyword">for</span> p = 1:1:length(Ucls)
+    tn = t + sum(Cls==Ucls(p));
+    lgdtxt{p} = [<span class="string">'Class '</span>, num2str(p), <span class="string">' vectors'</span>];
+    scatter3(r(t+1:1:tn,1),r(t+1:1:tn,2),r(t+1:1:tn,3),Syc{p});
+    t = tn;
+<span class="keyword">end</span>
+title([<span class="string">'3D Plot of dimensionally reduced vectors from '</span>,filename]);
+xlabel(<span class="string">'x axis'</span>);
+ylabel(<span class="string">'y axis'</span>);
+zlabel(<span class="string">'z axis'</span>);
+legend(lgdtxt);
+view(30,30);
+</pre><img vspace="5" hspace="5" src="kldaann_01.png" alt=""> <h2>Classification using Artificial Neural Network<a name="12"></a></h2><pre class="codeinput"><span class="comment">%-----------------------------------------------------------------------</span>
+<span class="comment">% Multi-class Classification done using ANN</span>
+<span class="comment">% No. of nodes in input layer is the dimension of input</span>
+<span class="comment">% Output has a single node, value outputed denotes the class</span>
+<span class="comment">% One hidden layer present, with appropriate no. of nodes</span>
+<span class="comment">%-----------------------------------------------------------------------</span>
+</pre><h2>Neural Network Load<a name="13"></a></h2><pre class="codeinput">TrainDR(tek,:) = [];
+Ni = size(TrainDR,2);  <span class="comment">% Number of Input Layer Nodes</span>
+No = 1;  <span class="comment">% Number of Output Layer Nodes</span>
+Ns = size(TrainDR,1);  <span class="comment">% Training data sample size</span>
+Nt = size(TestDR,1);  <span class="comment">% Test data sample size</span>
+h1 = ceil(Ns/(3*(Ni+No)));  <span class="comment">% Criterion to prevent overfitting</span>
+h2 = floor((Ni+No)/2);  <span class="comment">% Popular way to get size of hidden layer</span>
+h3 = 2*Ni-1;  <span class="comment">% Criterion to prevent overfitting</span>
+Nh = min([h1,h2,h3]);  <span class="comment">% Number of Hidden Layer Nodes</span>
+</pre><h2>Reordering of Training Data<a name="14"></a></h2><pre class="codeinput">tk = randperm(size(TrainDR,1));
+TrainDR = TrainDR(tk,:);
+Cls = Cls(tk);
+</pre><h2>Neural Network Initialization<a name="15"></a></h2><pre class="codeinput">P = zeros(Ni,Nh);  <span class="comment">% Input - Hidden Layer</span>
+Q = zeros(Nh,No);  <span class="comment">% Hidden Layer - Output</span>
+u = zeros(1,Nh);  <span class="comment">% Hidden Layer bias</span>
+v = zeros(1,No);  <span class="comment">% Output bias</span>
+LR = 0.001;  <span class="comment">% Learning Rate</span>
+Nepoch = 1000;  <span class="comment">% Number of Epochs for training</span>
+SSerr = zeros(1,Nepoch);  <span class="comment">% Sum Squared Error during each epoch</span>
+</pre><h2>Neural Network Training<a name="16"></a></h2><pre class="codeinput"><span class="keyword">for</span> k = 1:1:Nepoch
+    <span class="keyword">for</span> i = 1:1:Ns
+        <span class="comment">% Forward Propagation of Data</span>
+        IP = TrainDR(i,:);
+        H = 1./(1+exp(-(IP*P + u)));
+        OP = H*Q + v;
+        T = Cls(i);  <span class="comment">% Target Value</span>
+        E = T - OP;  <span class="comment">% Error</span>
+        SSerr(k) = SSerr(k) + sum(E.^2);  <span class="comment">% Sum Squared Error</span>
+
+        <span class="comment">% Back-propagation and weight adjustment</span>
+        Q = Q + LR*(H')*E;
+        v = v + LR*E;
+        tmp1 = repmat(E*(Q') , [Ni,1]);
+        tmp2 = (IP')*(H.*(1-H));
+        P = P + LR*tmp1.*tmp2;
+        u = u + LR*(H.*(1-H)).*(E*(Q'));
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+</pre><h2>Sum Squared Error Plot<a name="17"></a></h2><pre class="codeinput">figure;
+plot(1:Nepoch,SSerr);
+xlabel(<span class="string">'Epochs'</span>);
+ylabel(<span class="string">'Sum Squared Error'</span>);
+title(<span class="string">'Sum Squared Error of Neural Network for each epoch'</span>);
+</pre><img vspace="5" hspace="5" src="kldaann_02.png" alt=""> <h2>Model of Trained Neural Network<a name="18"></a></h2><pre class="codeinput">figure;
+hold <span class="string">on</span>;
+set(gca,<span class="string">'YTick'</span>,[]);
+set(gca,<span class="string">'XTick'</span>,[]);
+axis <span class="string">equal</span>;
+title(<span class="string">'Model of Trained Neural Network'</span>);
+pt1 = ( 2*(-(Ni-1)/2:(Ni-1)/2) )';
+pt2 = ( 2*(-(Nh-1)/2:(Nh-1)/2) )';
+pt3 = ( 2*(-(No-1)/2:(No-1)/2) )';
+
+Ctr1 = [repmat(2,[Ni,1]),pt1];
+Ctr2 = [repmat(5,[Nh,1]),pt2];
+Ctr3 = [repmat(8,[No,1]),pt3];
+Rd1 = repmat(0.2,[Ni,1]);
+Rd2 = repmat(0.2,[Nh,1]);
+Rd3 = repmat(0.2,[No,1]);
+viscircles(Ctr1,Rd1,<span class="string">'EdgeColor'</span>,<span class="string">'k'</span>);
+viscircles(Ctr2,Rd2,<span class="string">'EdgeColor'</span>,<span class="string">'k'</span>,<span class="string">'LineStyle'</span>,<span class="string">'--'</span>);
+viscircles(Ctr3,Rd3,<span class="string">'EdgeColor'</span>,<span class="string">'k'</span>);
+plot(Ctr1(:,1),Ctr1(:,2),<span class="string">'.k'</span>,<span class="string">'LineWidth'</span>,2);
+plot(Ctr2(:,1),Ctr2(:,2),<span class="string">'.k'</span>,<span class="string">'LineWidth'</span>,2);
+plot(Ctr3(:,1),Ctr3(:,2),<span class="string">'.k'</span>,<span class="string">'LineWidth'</span>,2);
+<span class="keyword">for</span> i = 1:Ni
+    <span class="keyword">for</span> j = 1:Nh
+        line([Ctr1(i,1),Ctr2(j,1)],[Ctr1(i,2),Ctr2(j,2)]);
+        txt = num2str(P(i,j));
+        C = (2.5*Ctr1(i,:) + Ctr2(j,:))/3.5;
+        text(C(1),C(2),txt);
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+<span class="keyword">for</span> i = 1:Nh
+    <span class="keyword">for</span> j = 1:No
+        line([Ctr2(i,1),Ctr3(j,1)],[Ctr2(i,2),Ctr3(j,2)]);
+        txt = num2str(Q(i,j));
+        C = (2.5*Ctr2(i,:) + Ctr3(j,:))/3.5;
+        text(C(1),C(2),txt);
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+<span class="keyword">for</span> i = 1:Nh
+    txt = num2str(u(i));
+    text(Ctr2(i,1)-0.3,Ctr2(i,2)+0.4,txt);
+<span class="keyword">end</span>
+<span class="keyword">for</span> i = 1:No
+    line([Ctr3(i,1),Ctr3(i,1)+1],[Ctr3(i,2),Ctr3(i,2)]);
+    txt = num2str(v(i));
+    text(Ctr3(i,1)-0.3,Ctr3(i,2)+0.4,txt);
+<span class="keyword">end</span>
+<span class="keyword">for</span> i = 1:Ni
+    line([Ctr1(i,1)-1,Ctr1(i,1)],[Ctr1(i,2),Ctr1(i,2)]);
+<span class="keyword">end</span>
+txt = {<span class="string">'Input'</span>,<span class="string">'Layer'</span>};
+text(Ctr1(1,1)-0.25,Ctr1(1,2)-0.7,txt,<span class="string">'FontWeight'</span>,<span class="string">'bold'</span>);
+txt = {<span class="string">'Hidden'</span>,<span class="string">'Layer'</span>};
+text(Ctr2(1,1)-0.25,Ctr1(1,2)-0.7,txt,<span class="string">'FontWeight'</span>,<span class="string">'bold'</span>);
+txt = {<span class="string">'Output'</span>,<span class="string">'Layer'</span>};
+text(Ctr3(1,1)-0.25,Ctr1(1,2)-0.7,txt,<span class="string">'FontWeight'</span>,<span class="string">'bold'</span>);
+</pre><img vspace="5" hspace="5" src="kldaann_03.png" alt=""> <h2>Neural Network Testing<a name="19"></a></h2><pre class="codeinput">Texp = zeros(Nt,1);  <span class="comment">% ANN Classification for Testing Data</span>
+To = zeros(Nt,1);
+<span class="keyword">for</span> j = 1:1:Nt
+    <span class="comment">% Input the Test data and get the output class</span>
+    Ti = TestDR(j,:);
+    H = 1./(1+exp(-(Ti*P + u)));
+    To(j) = H*Q + v;
+    Texp(j) = round(To(j));  <span class="comment">% Output rounded off</span>
+<span class="keyword">end</span>
+Accr = sum(Texp==Tecl);  <span class="comment">% Accuracy of ANN</span>
+disp([<span class="string">'The Neural Network correctly classified '</span>,num2str(Accr),<span class="keyword">...</span>
+    <span class="string">' out of '</span>,num2str(Nt),<span class="string">', resulting in an accuracy of '</span>,<span class="keyword">...</span>
+    num2str(Accr*100/Nt),<span class="string">' %'</span>]);
+</pre><pre class="codeoutput">The Neural Network correctly classified 27 out of 27, resulting in an accuracy of 100 %
+</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2015a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% Dimensionality Reduction and Classification using KLDA + ANN
+%% Function to perform KLDA and ANN
+%REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH-
+% Dimensionality Reduction using Kernel Linear Discriminant Analysis
+% Classification using Artificial Neural Network
+% Written by Abhiram S
+%REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH-
+
+%% Dataset Load
+filename = 'Meter C';
+Data = load(filename);  % Load the appropriate Dataset
+K = floor(0.15*size(Data,1));  % No. of instances in Test set
+tek = randperm(size(Data,1),K);  % Random instances for Test set
+TEData = Data(tek,:);  % Test Data Set
+Tecl = TEData(:,end);  % Classes of Test Data Set
+TEData = TEData(:,1:1:end-1);  % Removing class feature for testing
+TRData = Data;  % Training Data Set
+
+
+%% Kernel LDA Function
+%REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH-
+% Performs Dimensionality Reduction for the given Dataset
+% using Kernel Linear Discriminant Analysis technique
+%REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH-
+%% Data formatting
+Cls = TRData(:,end);  % Class feature extraction
+Ucls = unique(Cls);  % Extraction of distinct classes
+TRData = TRData(:,1:1:end-1);  % Removing class feature for training
+
+
+%% Gram matrix
+P = size(TRData,1);  % Training Data Instances
+sg = 0.005;  % Standard Deviation of Gaussian Kernel
+KGM = zeros(P);  % Gaussian Kernel Gram Matrix
+for i = 1:1:P
+    for j = 1:1:P
+        t1 = TRData(i,:);
+        t2 = TRData(j,:);
+        t1 = t1/sqrt(sum(t1.^2));
+        t2 = t2/sqrt(sum(t2.^2));
+        KGM(i,j) = exp( -sum((t1-t2).^2) / (sg^2));
+    end
+end
+
+
+%% Test matrix
+Q = size(TEData,1);  % Test Data Instances
+TM = zeros(Q,P);  % Test Matrix
+for i = 1:1:Q
+    for j = 1:1:P
+        t1 = TEData(i,:);
+        t2 = TRData(j,:);
+        t1 = t1/sqrt(sum(t1.^2));
+        t2 = t2/sqrt(sum(t2.^2));
+        TM(i,j) = exp( -sum((t1-t2).^2) / (sg^2));
+    end
+end
+
+
+%% Class separation
+DCell = cell(length(Ucls),1);  % Grouping class vectors into cells
+for p = 1:1:length(Ucls)
+    DCell{p} = KGM(Cls==Ucls(p),:);
+end
+
+
+%% Scatter matrix
+Sw = 0;  % Within-Class Scatter Matrix
+Mn = zeros(length(Ucls),P);
+for p = 1:1:length(Ucls)
+    Sw = Sw + cov(DCell{p});
+    Mn(p,:) = mean(DCell{p});
+end
+Sb = cov(Mn);  % Between-Class Scatter Matrix
+
+
+%% Dimensionality reduction
+[V,E] = eig(pinv(Sw)*Sb);  % Eigenvalues and Eigenvectors
+E = E/max(max(E));
+[E,I] = sort(diag(E),'descend');
+thr = 0.001;  % Normalised Threshold for choosing eigenvalue
+Te = E(E>thr);
+W = V(:, I(1:1:length(Te)) );  % Discriminant Matrix
+TrainDR = KGM * W;  % Dimensionally Reduced Training Data
+TestDR = TM * W;  % Dimensionally Reduced Test Data
+
+
+%% Feature Scaling and Normalization
+Ni = size(TrainDR,2);  % Number of reduced features
+MTD = zeros(1,Ni);  % Mean of attributes
+SDVTD = zeros(1,Ni);  % Standard Deviation of attributes
+for j = 1:1:Ni
+    MTD(j) = mean(TrainDR(:,j));
+    SDVTD(j) = 0.5*std(TrainDR(:,j));
+    TrainDR(:,j) = (TrainDR(:,j) - MTD(j))/SDVTD(j);
+end
+Nt = size(TestDR,1);
+TestDR = (TestDR - repmat(MTD,[Nt,1]))./repmat(SDVTD,[Nt,1]);
+
+
+%% 3D Plot of Training Data
+r = TrainDR;
+
+if(Ni==2)
+    r(:,3) = zeros(size(r,1),1);
+else
+    if(Ni==1)
+        r(:,[2,3]) = zeros(size(r,1),2);
+    end
+end
+
+% 3D Scatter Plot
+Syc={'o','x','+','s'};
+t=0;
+lgdtxt = cell(length(Ucls),1);
+figure;
+hold on;
+for p = 1:1:length(Ucls)
+    tn = t + sum(Cls==Ucls(p));
+    lgdtxt{p} = ['Class ', num2str(p), ' vectors'];
+    scatter3(r(t+1:1:tn,1),r(t+1:1:tn,2),r(t+1:1:tn,3),Syc{p});
+    t = tn;
+end
+title(['3D Plot of dimensionally reduced vectors from ',filename]);
+xlabel('x axis');
+ylabel('y axis');
+zlabel('z axis');
+legend(lgdtxt);
+view(30,30);
+
+
+
+%% Classification using Artificial Neural Network
+%REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH-
+% Multi-class Classification done using ANN
+% No. of nodes in input layer is the dimension of input
+% Output has a single node, value outputed denotes the class
+% One hidden layer present, with appropriate no. of nodes
+%REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH-
+%% Neural Network Load
+TrainDR(tek,:) = [];
+Ni = size(TrainDR,2);  % Number of Input Layer Nodes
+No = 1;  % Number of Output Layer Nodes
+Ns = size(TrainDR,1);  % Training data sample size
+Nt = size(TestDR,1);  % Test data sample size
+h1 = ceil(Ns/(3*(Ni+No)));  % Criterion to prevent overfitting
+h2 = floor((Ni+No)/2);  % Popular way to get size of hidden layer
+h3 = 2*Ni-1;  % Criterion to prevent overfitting
+Nh = min([h1,h2,h3]);  % Number of Hidden Layer Nodes
+
+
+%% Reordering of Training Data
+tk = randperm(size(TrainDR,1));
+TrainDR = TrainDR(tk,:);
+Cls = Cls(tk);
+
+
+%% Neural Network Initialization
+P = zeros(Ni,Nh);  % Input - Hidden Layer
+Q = zeros(Nh,No);  % Hidden Layer - Output
+u = zeros(1,Nh);  % Hidden Layer bias
+v = zeros(1,No);  % Output bias
+LR = 0.001;  % Learning Rate
+Nepoch = 1000;  % Number of Epochs for training
+SSerr = zeros(1,Nepoch);  % Sum Squared Error during each epoch
+
+
+%% Neural Network Training
+for k = 1:1:Nepoch
+    for i = 1:1:Ns
+        % Forward Propagation of Data
+        IP = TrainDR(i,:);
+        H = 1./(1+exp(-(IP*P + u)));
+        OP = H*Q + v;
+        T = Cls(i);  % Target Value
+        E = T - OP;  % Error
+        SSerr(k) = SSerr(k) + sum(E.^2);  % Sum Squared Error
+        
+        % Back-propagation and weight adjustment
+        Q = Q + LR*(H')*E;
+        v = v + LR*E;
+        tmp1 = repmat(E*(Q') , [Ni,1]);
+        tmp2 = (IP')*(H.*(1-H));
+        P = P + LR*tmp1.*tmp2;
+        u = u + LR*(H.*(1-H)).*(E*(Q'));
+    end
+end
+
+
+%% Sum Squared Error Plot
+figure;
+plot(1:Nepoch,SSerr);
+xlabel('Epochs');
+ylabel('Sum Squared Error');
+title('Sum Squared Error of Neural Network for each epoch');
+
+
+%% Model of Trained Neural Network
+figure;
+hold on;
+set(gca,'YTick',[]);
+set(gca,'XTick',[]);
+axis equal;
+title('Model of Trained Neural Network');
+pt1 = ( 2*(-(Ni-1)/2:(Ni-1)/2) )';
+pt2 = ( 2*(-(Nh-1)/2:(Nh-1)/2) )';
+pt3 = ( 2*(-(No-1)/2:(No-1)/2) )';
+
+Ctr1 = [repmat(2,[Ni,1]),pt1];
+Ctr2 = [repmat(5,[Nh,1]),pt2];
+Ctr3 = [repmat(8,[No,1]),pt3];
+Rd1 = repmat(0.2,[Ni,1]);
+Rd2 = repmat(0.2,[Nh,1]);
+Rd3 = repmat(0.2,[No,1]);
+viscircles(Ctr1,Rd1,'EdgeColor','k');
+viscircles(Ctr2,Rd2,'EdgeColor','k','LineStyle','REPLACE_WITH_DASH_DASH');
+viscircles(Ctr3,Rd3,'EdgeColor','k');
+plot(Ctr1(:,1),Ctr1(:,2),'.k','LineWidth',2);
+plot(Ctr2(:,1),Ctr2(:,2),'.k','LineWidth',2);
+plot(Ctr3(:,1),Ctr3(:,2),'.k','LineWidth',2);
+for i = 1:Ni
+    for j = 1:Nh
+        line([Ctr1(i,1),Ctr2(j,1)],[Ctr1(i,2),Ctr2(j,2)]);
+        txt = num2str(P(i,j));
+        C = (2.5*Ctr1(i,:) + Ctr2(j,:))/3.5;
+        text(C(1),C(2),txt);
+    end
+end
+for i = 1:Nh
+    for j = 1:No
+        line([Ctr2(i,1),Ctr3(j,1)],[Ctr2(i,2),Ctr3(j,2)]);
+        txt = num2str(Q(i,j));
+        C = (2.5*Ctr2(i,:) + Ctr3(j,:))/3.5;
+        text(C(1),C(2),txt);
+    end
+end
+for i = 1:Nh
+    txt = num2str(u(i));
+    text(Ctr2(i,1)-0.3,Ctr2(i,2)+0.4,txt);
+end
+for i = 1:No
+    line([Ctr3(i,1),Ctr3(i,1)+1],[Ctr3(i,2),Ctr3(i,2)]);
+    txt = num2str(v(i));
+    text(Ctr3(i,1)-0.3,Ctr3(i,2)+0.4,txt);
+end
+for i = 1:Ni
+    line([Ctr1(i,1)-1,Ctr1(i,1)],[Ctr1(i,2),Ctr1(i,2)]);
+end
+txt = {'Input','Layer'};
+text(Ctr1(1,1)-0.25,Ctr1(1,2)-0.7,txt,'FontWeight','bold');
+txt = {'Hidden','Layer'};
+text(Ctr2(1,1)-0.25,Ctr1(1,2)-0.7,txt,'FontWeight','bold');
+txt = {'Output','Layer'};
+text(Ctr3(1,1)-0.25,Ctr1(1,2)-0.7,txt,'FontWeight','bold');
+
+
+%% Neural Network Testing
+Texp = zeros(Nt,1);  % ANN Classification for Testing Data
+To = zeros(Nt,1);
+for j = 1:1:Nt
+    % Input the Test data and get the output class
+    Ti = TestDR(j,:);
+    H = 1./(1+exp(-(Ti*P + u)));
+    To(j) = H*Q + v;
+    Texp(j) = round(To(j));  % Output rounded off
+end
+Accr = sum(Texp==Tecl);  % Accuracy of ANN
+disp(['The Neural Network correctly classified ',num2str(Accr),...
+    ' out of ',num2str(Nt),', resulting in an accuracy of ',...
+    num2str(Accr*100/Nt),' %']);
+##### SOURCE END #####
+--></body></html>

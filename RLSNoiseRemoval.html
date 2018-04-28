@@ -1,0 +1,269 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>Noise Removal using RLS Adaptive Filtering</title><meta name="generator" content="MATLAB 8.5"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2018-04-19"><meta name="DC.source" content="RLSNoiseRemoval.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>Noise Removal using RLS Adaptive Filtering</h1><!--introduction--><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Recursive Least Square Algorithm for Noise Removal</a></li><li><a href="#2">Clear Data</a></li><li><a href="#3">Inputs and Parameters</a></li><li><a href="#4">Delayed Noisy Signal for Noise Removal</a></li><li><a href="#5">RLS Filter Initialization</a></li><li><a href="#6">RLS Filter Implementation</a></li><li><a href="#7">Signal and Spectrum of Input and Filtered Output</a></li><li><a href="#8">Error Plot of RLS Filter</a></li><li><a href="#9">Frequency Spectrum of FIR Filter</a></li></ul></div><h2>Recursive Least Square Algorithm for Noise Removal<a name="1"></a></h2><pre class="codeinput"><span class="comment">%------------------------------------------------------------------------</span>
+<span class="comment">% Recursive Least Square is an adaptive filtering technique</span>
+<span class="comment">% A variation of the adaptive filtering, where delayed noisy signal</span>
+<span class="comment">% is used to model the FIR filter, is implemented for noise removal</span>
+<span class="comment">% The noisy signal is then passed through the FIR Filter</span>
+<span class="comment">%------------------------------------------------------------------------</span>
+</pre><h2>Clear Data<a name="2"></a></h2><pre class="codeinput">clear,clc,close <span class="string">all</span>
+</pre><h2>Inputs and Parameters<a name="3"></a></h2><pre class="codeinput">M = 800;  <span class="comment">% Data Points in the Input Signal</span>
+m = 1:M;
+f1 = 100;  <span class="comment">% Frequency Component 1 of Input</span>
+f2 = 350;  <span class="comment">% Frequency Component 2 of Input</span>
+f3 = 700;  <span class="comment">% Frequency Component 3 of Input</span>
+fs = 2000;  <span class="comment">% Sampling Frequency of Input</span>
+SNR = 0;  <span class="comment">% Signal to Noise Ratio</span>
+Xn = cos(2*pi*m*f1/fs) + sin(2*pi*m*f2/fs) + sin(2*pi*m*f3/fs);  <span class="comment">% Input</span>
+Yn = awgn(Xn,SNR,<span class="string">'measured'</span>);  <span class="comment">% Input with added White Gaussian Noise</span>
+</pre><h2>Delayed Noisy Signal for Noise Removal<a name="4"></a></h2><pre class="codeinput">N = floor(M/4);  <span class="comment">% FIR Filter Length</span>
+r = N;  <span class="comment">% Delay in Noisy Input Signal</span>
+Ynr = [zeros(1,r),Yn];  <span class="comment">% Delayed Noisy Input</span>
+Ynr = Ynr(1:length(Yn));
+Xn = Xn(:);
+Yn = Yn(:);
+Ynr = Ynr(:);
+</pre><h2>RLS Filter Initialization<a name="5"></a></h2><pre class="codeinput">k = 1.001;  <span class="comment">% Inverse of Forgetting Factor</span>
+h = zeros(N,1);  <span class="comment">% FIR Filter Impulse Response</span>
+d = 1000 * var(Yn);
+P = d * eye(N,N);
+er = zeros(1,M-N+1);  <span class="comment">% Error signal</span>
+</pre><h2>RLS Filter Implementation<a name="6"></a></h2><pre class="codeinput"><span class="keyword">for</span> i = 1:1:(M-N+1)
+    index = i+N-1:-1:i;
+    X = Ynr(index);
+    Y = Yn(i+N-1);
+    g = k * P * X / (1 + k*X'*P*X);
+    a = Y - X'*h;
+    h = h + g*a;
+    P = k*P - k*g*X'*P;
+    er(i) = a;
+<span class="keyword">end</span>
+Ynr = Ynr(r+1:end);
+Zn = conv(Ynr,h);
+</pre><h2>Signal and Spectrum of Input and Filtered Output<a name="7"></a></h2><pre class="codeinput">figure;
+subplot(3,2,1);
+plot(Xn);
+xlabel(<span class="string">'n'</span>);  ylabel(<span class="string">'x(n)'</span>);
+title(<span class="string">'Noiseless Signal x(n)'</span>);
+subplot(3,2,3);
+plot(Yn);
+xlabel(<span class="string">'n'</span>);  ylabel(<span class="string">'y(n)'</span>);
+title(<span class="string">'Noisy Signal y(n)'</span>);
+subplot(3,2,5);
+plot(Zn);
+xlabel(<span class="string">'n'</span>);  ylabel(<span class="string">'z(n)'</span>);
+title(<span class="string">'Recovered Signal z(n)'</span>);
+
+k = -M/2:M/2-1;
+kz = -length(Zn)/2:length(Zn)/2-1;
+Xf = fftshift(fft(Xn));
+Yf = fftshift(fft(Yn));
+Zf = fftshift(fft(Zn));
+
+subplot(3,2,2);
+plot(k*fs/M,abs(Xf));
+axis <span class="string">tight</span>;
+xlabel(<span class="string">'Frequency (Hz)'</span>);  ylabel(<span class="string">'|X(f)|'</span>);
+title(<span class="string">'Frequency Spectrum of x(n)'</span>);
+subplot(3,2,4);
+plot(k*fs/M,abs(Yf));
+axis <span class="string">tight</span>;
+xlabel(<span class="string">'Frequency (Hz)'</span>);  ylabel(<span class="string">'|Y(f)|'</span>);
+title(<span class="string">'Frequency Spectrum of y(n)'</span>);
+subplot(3,2,6);
+plot(kz*fs/length(Zn),abs(Zf));
+axis <span class="string">tight</span>;
+xlabel(<span class="string">'Frequency (Hz)'</span>);  ylabel(<span class="string">'|Z(f)|'</span>);
+title(<span class="string">'Frequency Spectrum of z(n)'</span>);
+</pre><img vspace="5" hspace="5" src="RLSNoiseRemoval_01.png" alt=""> <h2>Error Plot of RLS Filter<a name="8"></a></h2><pre class="codeinput">figure;
+plot(abs(er));
+xlabel(<span class="string">'Discrete Variable n'</span>);
+ylabel(<span class="string">'Error |e(n)|'</span>);
+title(<span class="string">'Error Plot of RLS Filter'</span>);
+</pre><img vspace="5" hspace="5" src="RLSNoiseRemoval_02.png" alt=""> <h2>Frequency Spectrum of FIR Filter<a name="9"></a></h2><pre class="codeinput">kh = -N/2:N/2-1;
+Hf = fftshift(fft(h));
+figure;
+plot(kh*fs/N,abs(Hf));
+xlabel(<span class="string">'Frequency (Hz)'</span>);
+ylabel(<span class="string">'|H(f)|'</span>);
+title(<span class="string">'Frequency Spectrum of RLS Filter'</span>);
+</pre><img vspace="5" hspace="5" src="RLSNoiseRemoval_03.png" alt=""> <p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2015a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% Noise Removal using RLS Adaptive Filtering
+%% Recursive Least Square Algorithm for Noise Removal
+%REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
+% Recursive Least Square is an adaptive filtering technique
+% A variation of the adaptive filtering, where delayed noisy signal
+% is used to model the FIR filter, is implemented for noise removal
+% The noisy signal is then passed through the FIR Filter
+%REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
+%% Clear Data
+clear,clc,close all
+
+%% Inputs and Parameters
+M = 800;  % Data Points in the Input Signal
+m = 1:M;
+f1 = 100;  % Frequency Component 1 of Input
+f2 = 350;  % Frequency Component 2 of Input
+f3 = 700;  % Frequency Component 3 of Input
+fs = 2000;  % Sampling Frequency of Input
+SNR = 0;  % Signal to Noise Ratio
+Xn = cos(2*pi*m*f1/fs) + sin(2*pi*m*f2/fs) + sin(2*pi*m*f3/fs);  % Input
+Yn = awgn(Xn,SNR,'measured');  % Input with added White Gaussian Noise
+
+
+%% Delayed Noisy Signal for Noise Removal
+N = floor(M/4);  % FIR Filter Length
+r = N;  % Delay in Noisy Input Signal
+Ynr = [zeros(1,r),Yn];  % Delayed Noisy Input
+Ynr = Ynr(1:length(Yn));
+Xn = Xn(:);
+Yn = Yn(:);
+Ynr = Ynr(:);
+
+
+%% RLS Filter Initialization  
+k = 1.001;  % Inverse of Forgetting Factor
+h = zeros(N,1);  % FIR Filter Impulse Response
+d = 1000 * var(Yn);
+P = d * eye(N,N);
+er = zeros(1,M-N+1);  % Error signal
+
+
+%% RLS Filter Implementation
+for i = 1:1:(M-N+1)
+    index = i+N-1:-1:i;
+    X = Ynr(index);
+    Y = Yn(i+N-1);
+    g = k * P * X / (1 + k*X'*P*X);
+    a = Y - X'*h;
+    h = h + g*a;
+    P = k*P - k*g*X'*P;
+    er(i) = a;
+end
+Ynr = Ynr(r+1:end);
+Zn = conv(Ynr,h);
+
+
+%% Signal and Spectrum of Input and Filtered Output
+figure;
+subplot(3,2,1);
+plot(Xn);
+xlabel('n');  ylabel('x(n)');
+title('Noiseless Signal x(n)');
+subplot(3,2,3);
+plot(Yn);
+xlabel('n');  ylabel('y(n)');
+title('Noisy Signal y(n)');
+subplot(3,2,5);
+plot(Zn);
+xlabel('n');  ylabel('z(n)');
+title('Recovered Signal z(n)');
+
+k = -M/2:M/2-1;
+kz = -length(Zn)/2:length(Zn)/2-1;
+Xf = fftshift(fft(Xn));
+Yf = fftshift(fft(Yn));
+Zf = fftshift(fft(Zn));
+
+subplot(3,2,2);
+plot(k*fs/M,abs(Xf));
+axis tight;
+xlabel('Frequency (Hz)');  ylabel('|X(f)|');
+title('Frequency Spectrum of x(n)');
+subplot(3,2,4);
+plot(k*fs/M,abs(Yf));
+axis tight;
+xlabel('Frequency (Hz)');  ylabel('|Y(f)|');
+title('Frequency Spectrum of y(n)');
+subplot(3,2,6);
+plot(kz*fs/length(Zn),abs(Zf));
+axis tight;
+xlabel('Frequency (Hz)');  ylabel('|Z(f)|');
+title('Frequency Spectrum of z(n)');
+
+
+%% Error Plot of RLS Filter
+figure;
+plot(abs(er));
+xlabel('Discrete Variable n');
+ylabel('Error |e(n)|');
+title('Error Plot of RLS Filter');
+
+
+%% Frequency Spectrum of FIR Filter
+kh = -N/2:N/2-1;
+Hf = fftshift(fft(h));
+figure;
+plot(kh*fs/N,abs(Hf));
+xlabel('Frequency (Hz)');
+ylabel('|H(f)|');
+title('Frequency Spectrum of RLS Filter');
+##### SOURCE END #####
+--></body></html>
